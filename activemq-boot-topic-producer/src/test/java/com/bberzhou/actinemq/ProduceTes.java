@@ -1,0 +1,34 @@
+package com.bberzhou.actinemq;
+
+import com.bberzhou.activemq.TopicProducerMain;
+import com.bberzhou.activemq.produce.TopicProducer;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.context.web.WebAppConfiguration;
+
+import javax.annotation.Resource;
+
+/**
+ * @description: 测试topic生产者
+ * @author: bberzhou@gmail.com
+ * @date: 4/10/2022
+ * Create By Intellij IDEA
+ */
+@SpringBootTest(classes = {TopicProducerMain.class})
+// @RunWith(SpringJUnit4ClassRunner.class)
+// 注意，@RunWith注解 在 JUnit 5.0之后，被 @ExtendWith()注解取代
+@ExtendWith(SpringExtension.class)
+@WebAppConfiguration
+public class ProduceTes {
+    @Resource
+    private TopicProducer topicProducer;
+
+    @Test
+    public void testSend(){
+        topicProducer.produceTopic();
+    }
+}
+
+

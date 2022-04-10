@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context
+       https://www.springframework.org/schema/context/spring-context.xsd">
+
+    <!-- 开启包的自动扫描-->
+    <context:component-scan base-package="com.bberzhou.activemq"/>
+
+    <!-- 配置生产者-->
+
+    <!-- 获取连接工厂-->
+    <bean id="jmsFactory" class="org.apache.activemq.pool.PooledConnectionFactory" destroy-method="stop">
+        <property name="connectionFactory">
+            <!-- 真正可以产生Connection的ConnectionFactory，由对应的JMS服务厂商来提供-->
+            <bean class="org.apache.activemq.ActiveMQConnectionFactory">
+                <property name="brokerURL" value="tcp://192.168.60.130:61616"/>
+            </bean>
+        </property>
+        <!-- 设置最大连接数-->
+        <property name="maxConnections" value="100"/>
+    </bean>
+
+    <!-- 队列 ：通过构造注入来创建一个 queue的destination，名称为spring-active-queue -->
+    <bean id="destinationQueue" class="org.apache.activemq.command.ActiveMQQueue">
+        <constructor-arg index="0" value="spring-active-queue"/>
+    </bean>
+
+    <!-- 主题：topic，通过构造注入来创建一个 topic的destination，名称为spring-active-topic-->
+    <bean id="destinationTopic" class="org.apache.activemq.command.ActiveMQTopic">
+        <constructor-arg index="0" value="spring-active-topic"/>
+    </bean>
+
+
+    <!--Spring 提供的JMS Template模板工具类，它可以进行消息的发送、接收、消息发送是否持久等等等-->
+    <bean id="jmsTemplate" class="org.springframework.jms.core.JmsTemplate">
+        <!-- 通过这个Template来操作 activemq，-->
+        <!-- 设置连接工厂，destination，引用签名的bean-->
+        <property name="connectionFactory" ref="jmsFactory"/>
+        <!--queue-->
+        <!--<property name="defaultDestination" ref="destinationQueue"/>-->
+        <!--topic-->
+        <property name="defaultDestination" ref="destinationTopic"/>
+        <property name="messageConverter">
+            <!-- 对消息进行转换-->
+            <bean class="org.springframework.jms.support.converter.SimpleMessageConverter"/>
+        </property>
+    </bean>
+
+    <!-- 配置 监听器，让消费者不用提前先启动，-->
+    <bean id="jmsContainer" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+        <property name="connectionFactory" ref="jmsFactory"/>
+        <!-- 注意监听的是 topic-->
+        <property name="destination" ref="destinationTopic"/>
+        <!-- 自定义的消息监听器，myMessageListener implements MessageListenerContainer -->
+        <!--<property name="messageListener" ref="Listener"/>-->
+        <property name="messageListener" ref="myMessageListener"/>
+
+    </bean>
+    <!-- 在Spring中创建一个Bean，或者在实现类上使用注解的方式注入到Spring容器中，注意默认是类名首字母小写-->
+    <!--<bean id="myMessageListener" class="com.bberzhou.activemq.spring.MyMessageListener"/>-->
+</beans>

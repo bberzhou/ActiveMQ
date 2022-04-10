@@ -1,0 +1,20 @@
+# 配置端口
+server:
+  port: 7778
+
+spring:
+  activemq:
+    # 配置mq的服务器地址
+    broker-url: "tcp://192.168.60.130:61616"
+    # 访问的用户名和密码
+    user: admin
+    password: admin
+
+  jms:
+    # true代表topic的发布/订阅模式，false 代表队列，默认值为false
+    pub-sub-domain: false
+
+
+# 自定义队列名称
+
+myQueue: boot-activemq-queue
